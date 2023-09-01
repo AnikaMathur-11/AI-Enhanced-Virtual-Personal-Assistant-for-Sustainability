@@ -1,0 +1,77 @@
+import speech_recognition as sr
+import pyttsx3
+import datetime
+import wikipedia
+import webbrowser
+import os
+import random
+
+# Initialize text-to-speech engine
+engine = pyttsx3.init()
+
+# Define sustainability tips
+sustainability_tips = [
+    "Reduce, Reuse, Recycle: Always look for opportunities to recycle or repurpose items.",
+    "Save Energy: Turn off lights and unplug devices when not in use.",
+    "Conserve Water: Fix any leaks and avoid wasting water whenever possible.",
+    "Use Public Transportation: Reduce your carbon footprint by using public transit.",
+    "Reduce Meat Consumption: Eating less meat can lower your environmental impact.",
+    "Plant Trees: Participate in tree-planting events or initiatives.",
+    "Shop Locally: Support local businesses and reduce transportation-related emissions.",
+]
+
+# Define virtual assistant functions
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+def greet_user():
+    hour = datetime.datetime.now().hour
+    if 0 <= hour < 12:
+        speak("Good morning!")
+    elif 12 <= hour < 18:
+        speak("Good afternoon!")
+    else:
+        speak("Good evening!")
+
+def listen_to_user():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        recognizer.pause_threshold = 1
+        audio = recognizer.listen(source)
+    try:
+        print("Recognizing...")
+        user_query = recognizer.recognize_google(audio, language="en")
+        print(f"User said: {user_query}\n")
+        return user_query
+    except Exception as e:
+        print(e)
+        return None
+
+def sustainability_assistant():
+    greet_user()
+    speak("How can I assist you with sustainability today?")
+    while True:
+        user_query = listen_to_user()
+        if user_query is not None:
+            if "sustainability tip" in user_query:
+                tip = random.choice(sustainability_tips)
+                speak(tip)
+            elif "search" in user_query:
+                speak("What would you like to search for?")
+                search_query = listen_to_user()
+                if search_query:
+                    try:
+                        speak(f"Searching for {search_query} on the web.")
+                        webbrowser.open(f"https://www.google.com/search?q={search_query}")
+                    except Exception as e:
+                        speak("I encountered an error while searching. Please try again.")
+            elif "exit" in user_query:
+                speak("Goodbye!")
+                break
+            else:
+                speak("I'm sorry, I didn't understand that. Please try again.")
+
+if __name__ == "__main__":
+    sustainability_assistant()
